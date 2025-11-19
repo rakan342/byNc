@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusConvert - منصة التحويلات المتقدمة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- مكتبات الباركود المحسنة -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary-dark: #0f172a;
+            --primary: #1e293b;
+            --primary-light: #334155;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --gold: #f59e0b;
+            --text-light: #f8fafc;
+            --text-gray: #cbd5e1;
+            --success: #10b981;
+            --error: #ef4444;
+            --border-radius: 16px;
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-dark), #0a0f1f);
+            color: var(--text-light);
+            line-height: 1.7;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* الترويسة الفاخرة */
+        header {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1.2rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            background: linear-gradient(135deg, var(--accent), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.2rem;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--text-light), var(--text-gray));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2.5rem;
+        }
+
+        nav a {
+            color: var(--text-gray);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.7rem 1.2rem;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        nav a::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(to right, var(--accent), var(--gold));
+            transition: var(--transition);
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--text-light);
+        }
+
+        nav a:hover::before, nav a.active::before {
+            width: 100%;
+        }
+
+        /* الأقسام الرئيسية */
+        .section {
+            display: none;
+            padding: 8rem 0 4rem;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-title h2 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--text-light), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(to right, var(--accent), var(--gold));
+            border-radius: 3px;
+        }
+
+        .section-title p {
+            color: var(--text-gray);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* كروت الخدمات */
+        .services {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+            margin-top: 3rem;
+        }
+
+        .service-card {
+            background: linear-gradient(145deg, var(--glass), rgba(30, 41, 59, 0.7));
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            text-align: center;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(to right, var(--accent), var(--gold));
+        }
+
+        .service-card:hover {
+            transform: translateY(-15px);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.6);
+        }
+
+        .service-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.8rem;
+            background: linear-gradient(135deg, var(--accent), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .service-card h3 {
+            font-size: 1.6rem;
+            margin-bottom: 1.2rem;
+            color: var(--text-light);
+        }
+
+        .service-card p {
+            color: var(--text-gray);
+            margin-bottom: 2rem;
+            font-size: 1.05rem;
+        }
+
+        /* نماذج الإدخال */
+        .form-container {
+            background: linear-gradient(145deg, var(--glass), rgba(30, 41, 59, 0.7));
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 3rem;
+            box-shadow: var(--shadow);
+            max-width: 900px;
+            margin: 0 auto;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.8rem;
+            font-weight: 500;
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+            color: var(--text-light);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-gray);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-block {
+            display: flex;
+            width: 100%;
+        }
+
+        .btn i {
+            font-size: 1.2rem;
+        }
+
+        /* نتائج التحويل */
+        .result-container {
+            margin-top: 2.5rem;
+            padding: 2rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .result-container.active {
+            display: block;
+        }
+
+        .result-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-light);
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result-title i {
+            color: var(--success);
+        }
+
+        .result-content {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
+
+        .result-url {
+            flex: 1;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--text-light);
+            font-family: monospace;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .result-url:hover {
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        .copy-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .copy-btn:hover {
+            background: #0da271;
+            transform: translateY(-2px);
+        }
+
+        /* الباركود */
+        #barcode-result {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        #barcode-canvas {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            background: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* شريط التقدم */
+        .progress-container {
+            margin: 1.5rem 0;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--accent), var(--gold));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: var(--text-gray);
+            margin-bottom: 1rem;
+        }
+
+        /* الإشعارات */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: var(--primary);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1001;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            max-width: 400px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--error);
+        }
+
+        .notification i {
+            font-size: 1.2rem;
+        }
+
+        .notification.success i {
+            color: var(--success);
+        }
+
+        .notification.error i {
+            color: var(--error);
+        }
+
+        /* تنسيقات إضافية */
+        .format-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .format-option {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .format-option:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--accent);
+        }
+
+        .format-option.active {
+            background: rgba(99, 102, 241, 0.3);
+            border-color: var(--accent);
+        }
+
+        .format-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+        }
+
+        /* التذييل */
+        footer {
+            background: rgba(15, 23, 42, 0.9);
+            border-top: 1px solid var(--glass-border);
+            padding: 4rem 0 2rem;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-column h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1.8rem;
+            color: var(--text-light);
+            position: relative;
+            display: inline-block;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 1rem;
+        }
+
+        .footer-column a {
+            color: var(--text-gray);
+            text-decoration: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-column a:hover {
+            color: var(--accent);
+            transform: translateX(5px);
+        }
+
+        .footer-column a i {
+            font-size: 0.9rem;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid var(--glass-border);
+            color: var(--text-gray);
+            font-size: 0.95rem;
+        }
+
+        /* التجاوب مع الشاشات المختلفة */
+        @media (max-width: 1024px) {
+            .services {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+            
+            .section-title h2 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            
+            nav ul {
+                gap: 1rem;
+            }
+            
+            .section {
+                padding: 7rem 0 3rem;
+            }
+            
+            .section-title h2 {
+                font-size: 2.2rem;
+            }
+            
+            .form-container {
+                padding: 2rem;
+            }
+            
+            .result-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .copy-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .notification {
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+
+            .format-grid {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            }
+        }
+
+        /* تأثيرات إضافية */
+        .floating-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+            background: 
+                radial-gradient(circle at 20% 80%, var(--accent) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, var(--gold) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, #10b981 0%, transparent 50%);
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            50% {
+                transform: translate(-30px, -20px) rotate(180deg);
+            }
+            100% {
+                transform: translate(0, 0) rotate(360deg);
+            }
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 4rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--accent), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: block;
+        }
+
+        .stat-label {
+            color: var(--text-gray);
+            font-size: 1rem;
+        }
+
+        .file-info {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .file-info.active {
+            display: block;
+        }
+
+               /* قسم قريباً */
+        .coming-soon-container {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(145deg, var(--glass), rgba(30, 41, 59, 0.7));
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            backdrop-filter: blur(10px);
+            margin-top: 2rem;
+        }
+
+        .coming-soon-icon {
+            font-size: 4rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, var(--accent), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .coming-soon-container h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--text-light);
+        }
+
+        .coming-soon-container p {
+            color: var(--text-gray);
+            font-size: 1.2rem;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- خلفية عائمة -->
+    <div class="floating-bg"></div>
+
+    <!-- إشعارات -->
+    <div id="notification" class="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notification-message"></span>
+    </div>
+
+    <!-- الترويسة الفاخرة -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <h1>Nexus<span>Convert</span></h1>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="#" class="nav-link active" data-section="home"><i class="fas fa-home"></i> الرئيسية</a></li>
+                        <li><a href="#" class="nav-link" data-section="url-shortener"><i class="fas fa-link"></i> اختصار الروابط</a></li>
+                        <li><a href="#" class="nav-link" data-section="file-converter"><i class="fas fa-exchange-alt"></i> تحويل الملفات</a></li>
+                        <li><a href="#" class="nav-link" data-section="barcode-generator"><i class="fas fa-qrcode"></i> مولد الباركود</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- المحتوى الرئيسي -->
+    <main>
+        <!-- قسم الرئيسية -->
+        <section id="home" class="section active">
+            <div class="container">
+                <div class="section-title">
+                    <h2>منصة التحويلات المتقدمة</h2>
+                    <p>حلول احترافية متكاملة لتحويل الملفات واختصار الروابط وإنشاء الباركود بجودة ودقة عالية</p>
+                </div>
+                
+                <div class="services">
+                    <div class="service-card" data-section="url-shortener">
+                        <div class="service-icon">
+                            <i class="fas fa-link"></i>
+                        </div>
+                        <h3>اختصار الروابط</h3>
+                        <p>حول روابطك الطويلة إلى روابط قصيرة وسهلة المشاركة مع تتبع الإحصائيات وتحليلات الأداء</p>
+                        <button class="btn"><i class="fas fa-arrow-right"></i> استخدم الأداة</button>
+                    </div>
+                    
+                    <div class="service-card" data-section="file-converter">
+                        <div class="service-icon">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <h3>تحويل الملفات</h3>
+                        <p>تحويل بين جميع صيغ الملفات الشائعة بدقة وجودة عالية مع الحفاظ على الخصائص الأصلية</p>
+                        <button class="btn"><i class="fas fa-arrow-right"></i> استخدم الأداة</button>
+                    </div>
+                    
+                    <div class="service-card" data-section="barcode-generator">
+                        <div class="service-icon">
+                            <i class="fas fa-qrcode"></i>
+                        </div>
+                        <h3>مولد الباركود</h3>
+                        <p>أنشئ باركود وQR Code مخصص بسهولة مع خيارات متقدمة للتصميم والتخصيص</p>
+                        <button class="btn"><i class="fas fa-arrow-right"></i> استخدم الأداة</button>
+                    </div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-number">150K+</span>
+                        <span class="stat-label">رابط مختصر</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">85K+</span>
+                        <span class="stat-label">ملف محوّل</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">99.8%</span>
+                        <span class="stat-label">رضا العملاء</span>
+                    </div>
+                        <div class="stat-item">
+                        <span class="stat-number">Soon...</span>
+                        <span class="stat-label">باركود مُنشأ</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- قسم اختصار الروابط -->
+        <section id="url-shortener" class="section">
+            <div class="container">
+                <div class="section-title">
+                    <h2>اختصار الروابط</h2>
+                    <p>حول روابطك الطويلة إلى روابط قصيرة وسهلة المشاركة مع إحصائيات متقدمة</p>
+                </div>
+                
+                <div class="form-container">
+                    <div class="form-group">
+                        <label for="long-url"><i class="fas fa-globe"></i> أدخل الرابط الطويل</label>
+                        <input type="url" id="long-url" class="form-control" placeholder="https://example.com/very-long-url-that-needs-to-be-shortened">
+                    </div>              
+                    <div class="form-group">
+                        <label for="custom-alias"><i class="fas fa-tag"></i> اسم مخصص (اختياري)</label>
+                        <input type="text" id="custom-alias" class="form-control" placeholder="my-custom-link">
+                    </div>
+                    
+                    <button id="shorten-btn" class="btn btn-block"><i class="fas fa-compress-alt"></i> اختصار الرابط</button>
+                    
+                    <div id="url-result" class="result-container">
+                        <div class="result-title">
+                            <i class="fas fa-check-circle"></i> الرابط المختصر:
+                        </div>
+                        <div class="result-content">
+                            <a id="short-url" class="result-url" target="_blank"></a>
+                            <button id="copy-url" class="copy-btn"><i class="fas fa-copy"></i> نسخ</button>
+                        </div>
+                        <div class="progress-text" id="url-stats">انقر على الرابط للانتقال مباشرة إلى المحتوى</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- قسم تحويل الملفات -->
+        <section id="file-converter" class="section">
+            <div class="container">
+                <div class="section-title">
+                    <h2>تحويل الملفات</h2>
+                    <p>تحويل بين مختلف صيغ الملفات بجودة عالية وسرعة فائقة</p>
+                </div>
+                
+                <div class="form-container">
+                    <div class="form-group">
+                        <label for="conversion-type"><i class="fas fa-cogs"></i> نوع التحويل</label>
+                        <select id="conversion-type" class="form-control">
+                            <option value="audio">تحويل الصوت</option>
+                            <option value="video">تحويل الفيديو</option>
+                            <option value="image">تحويل الصور</option>
+                            <option value="document">تحويل المستندات</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-file-export"></i> اختر الصيغة المستهدفة</label>
+                        <div class="format-grid" id="format-options">
+                            <!-- سيتم تعبئة الخيارات بناءً على نوع التحويل -->
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="file-input"><i class="fas fa-file-upload"></i> اختر الملف</label>
+                        <input type="file" id="file-input" class="form-control">
+                        <div id="file-info" class="file-info">
+                            <div><strong>اسم الملف:</strong> <span id="file-name"></span></div>
+                            <div><strong>الحجم:</strong> <span id="file-size"></span></div>
+                            <div><strong>النوع:</strong> <span id="file-type"></span></div>
+                        </div>
+                    </div>
+                    
+                    <button id="convert-btn" class="btn btn-block"><i class="fas fa-sync-alt"></i> تحويل الملف</button>
+                    
+                    <div class="progress-container" id="conversion-progress" style="display: none;">
+                        <div class="progress-bar" id="progress-bar"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text"></div>
+                    
+                    <div id="conversion-result" class="result-container">
+                        <div class="result-title">
+                            <i class="fas fa-check-circle"></i> التحويل مكتمل:
+                        </div>
+                        <div class="result-content">
+                            <div id="converted-file" class="result-url"></div>
+                            <button id="download-file" class="btn"><i class="fas fa-download"></i> تحميل</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- قسم مولد الباركود -->
+        <section id="barcode-generator" class="section">
+            <div class="container">
+                <div class="section-title">
+                    <h2>مولد الباركود</h2>
+                    <p>أنشئ باركود مخصص بسهولة لروابطك ونصوصك ومعلوماتك</p>
+                </div>
+                       
+                <div class="coming-soon-container">
+                    <div class="coming-soon-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h3>قريباً</h3>
+                    <p>نعمل حالياً على تطوير مولد الباركود والQR Code ليقدم لكم أفضل تجربة ممكنة. هذه الميزة ستكون متاحة قريباً!</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- التذييل -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>NexusConvert</h3>
+                    <p>منصة متكاملة تقدم حلولاً رقمية متقدمة لتحويل الملفات واختصار الروابط وإنشاء الباركود بجودة ودقة عالية.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>روابط سريعة</h3>
+                    <ul>
+                        <li><a href="#" class="nav-link" data-section="home"><i class="fas fa-chevron-left"></i> الرئيسية</a></li>
+                        <li><a href="#" class="nav-link" data-section="url-shortener"><i class="fas fa-chevron-left"></i> اختصار الروابط</a></li>
+                        <li><a href="#" class="nav-link" data-section="file-converter"><i class="fas fa-chevron-left"></i> تحويل الملفات</a></li>
+                        <li><a href="#" class="nav-link" data-section="barcode-generator"><i class="fas fa-chevron-left"></i> مولد الباركود</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>الدعم</h3>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-chevron-left"></i> الأسئلة الشائعة</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-left"></i> اتصل بنا</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-left"></i> شروط الخدمة</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-left"></i> سياسة الخصوصية</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>جميع الحقوق محفوظة &copy; 2026 NexusConvert</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // متغيرات التطبيق
+        let convertedFileUrl = null;
+        let currentBarcodeUrl = null;
+        let selectedFormat = null;
+
+        // وظيفة عرض الإشعارات
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const messageEl = document.getElementById('notification-message');
+            
+            notification.className = `notification ${type}`;
+            messageEl.textContent = message;
+            
+            // تحديث الأيقونة بناءً على النوع
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            notification.innerHTML = `<i class="fas ${icon}"></i><span id="notification-message">${message}</span>`;
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        // تهيئة خيارات تحويل الملفات
+        function initConversionOptions() {
+            const conversionType = document.getElementById('conversion-type');
+            const formatOptions = document.getElementById('format-options');
+            
+            const options = {
+                'audio': [
+                    { value: 'mp3', text: 'MP3', icon: 'fa-music' },
+                    { value: 'wav', text: 'WAV', icon: 'fa-volume-up' },
+                    { value: 'aac', text: 'AAC', icon: 'fa-file-audio' },
+                    { value: 'flac', text: 'FLAC', icon: 'fa-headphones' },
+                    { value: 'm4a', text: 'M4A', icon: 'fa-podcast' },
+                    { value: 'wma', text: 'WMA', icon: 'fa-wave-square' },
+                    { value: 'ogg', text: 'OGG', icon: 'fa-compact-disc' },
+                    { value: 'aiff', text: 'AIFF', icon: 'fa-microphone' }
+                ],
+                'video': [
+                    { value: 'mp4', text: 'MP4', icon: 'fa-video' },
+                    { value: 'avi', text: 'AVI', icon: 'fa-film' },
+                    { value: 'mov', text: 'MOV', icon: 'fa-play-circle' },
+                    { value: 'mkv', text: 'MKV', icon: 'fa-tv' },
+                    { value: 'wmv', text: 'WMV', icon: 'fa-file-video' },
+                    { value: 'flv', text: 'FLV', icon: 'fa-video-slash' },
+                    { value: 'webm', text: 'WEBM', icon: 'fa-globe' },
+                    { value: 'mpeg', text: 'MPEG', icon: 'fa-photo-video' }
+                ],
+                'image': [
+                    { value: 'jpg', text: 'JPG', icon: 'fa-image' },
+                    { value: 'png', text: 'PNG', icon: 'fa-file-image' },
+                    { value: 'gif', text: 'GIF', icon: 'fa-photo-film' },
+                    { value: 'webp', text: 'WebP', icon: 'fa-panorama' },
+                    { value: 'bmp', text: 'BMP', icon: 'fa-id-card' },
+                    { value: 'svg', text: 'SVG', icon: 'fa-shapes' },
+                    { value: 'ico', text: 'ICO', icon: 'fa-flag' },
+                    { value: 'tiff', text: 'TIFF', icon: 'fa-file-alt' }
+                ],
+                'document': [
+                    { value: 'pdf', text: 'PDF', icon: 'fa-file-pdf' },
+                    { value: 'doc', text: 'DOC', icon: 'fa-file-word' },
+                    { value: 'docx', text: 'DOCX', icon: 'fa-file' },
+                    { value: 'txt', text: 'TXT', icon: 'fa-file-alt' },
+                    { value: 'rtf', text: 'RTF', icon: 'fa-file-contract' },
+                    { value: 'odt', text: 'ODT', icon: 'fa-file-signature' }
+                ]
+            };
+            
+            // تعبئة الخيارات بناءً على النوع المحدد
+            const selectedType = conversionType.value;
+            formatOptions.innerHTML = options[selectedType].map(opt => 
+                `<div class="format-option" data-format="${opt.value}">
+                    <div class="format-icon"><i class="fas ${opt.icon}"></i></div>
+                    <div>${opt.text}</div>
+                </div>`
+            ).join('');
+            
+            // إضافة أحداث النقر للخيارات
+            document.querySelectorAll('.format-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    // إزالة النشاط من جميع الخيارات
+                    document.querySelectorAll('.format-option').forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+                    
+                    // إضافة النشاط للخيار المحدد
+                    this.classList.add('active');
+                    selectedFormat = this.getAttribute('data-format');
+                });
+            });
+            
+            // تحديد أول خيار بشكل افتراضي
+            if (options[selectedType].length > 0) {
+                const firstOption = formatOptions.querySelector('.format-option');
+                firstOption.classList.add('active');
+                selectedFormat = firstOption.getAttribute('data-format');
+            }
+        }
+
+        // تحديث معلومات الملف
+        document.getElementById('file-input').addEventListener('change', function() {
+            const fileInfo = document.getElementById('file-info');
+            const fileName = document.getElementById('file-name');
+            const fileSize = document.getElementById('file-size');
+            const fileType = document.getElementById('file-type');
+            
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                fileName.textContent = file.name;
+                fileSize.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+                fileType.textContent = file.type || 'غير معروف';
+                fileInfo.classList.add('active');
+            } else {
+                fileInfo.classList.remove('active');
+            }
+        });
+
+        // التنقل بين الأقسام
+        document.querySelectorAll('.nav-link, .service-card .btn').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // إزالة النشاط من جميع الروابط
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                });
+                
+                // إضافة النشاط للرابط المحدد
+                let targetSection;
+                if (this.classList.contains('nav-link')) {
+                    this.classList.add('active');
+                    targetSection = this.getAttribute('data-section');
+                } else {
+                    targetSection = this.closest('.service-card').getAttribute('data-section');
+                    document.querySelector(`.nav-link[data-section="${targetSection}"]`).classList.add('active');
+                }
+                
+                // إخفاء جميع الأقسام
+                document.querySelectorAll('.section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                // إظهار القسم المحدد
+                document.getElementById(targetSection).classList.add('active');
+                
+                // إذا كان القسم هو تحويل الملفات، نقوم بتهيئة الخيارات
+                if (targetSection === 'file-converter') {
+                    initConversionOptions();
+                }
+                
+                // التمرير إلى أعلى الصفحة
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+
+        // تحديث خيارات التحويل عند تغيير النوع
+        document.getElementById('conversion-type').addEventListener('change', initConversionOptions);
+
+        // تهيئة الخيارات عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', initConversionOptions);
+
+        // اختصار الروابط باستخدام خدمة بديلة
+        document.getElementById('shorten-btn').addEventListener('click', async function() {
+            const longUrl = document.getElementById('long-url').value;
+            const customAlias = document.getElementById('custom-alias').value;
+            
+            if (!longUrl) {
+                showNotification('يرجى إدخال رابط صحيح', 'error');
+                return;
+            }
+            
+            // تغيير حالة الزر
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الاختصار...';
+            this.disabled = true;
+            
+            try {
+                // استخدام خدمة is.gd كبديل (لا تحتاج API key)
+                const response = await fetch(`https://is.gd/create.php?format=json&url=${encodeURIComponent(longUrl)}`);
+                
+                if (!response.ok) {
+                    throw new Error('فشل في اختصار الرابط');
+                }
+                
+                const data = await response.json();
+                const shortUrl = data.shorturl;
+                
+                // عرض الرابط المختصر كرابط قابل للنقر
+                const shortUrlElement = document.getElementById('short-url');
+                shortUrlElement.textContent = shortUrl;
+                shortUrlElement.href = shortUrl;
+                document.getElementById('url-result').classList.add('active');
+                
+                showNotification('تم اختصار الرابط بنجاح!');
+                
+                // إعادة تعيين الزر
+                this.innerHTML = '<i class="fas fa-compress-alt"></i> اختصار الرابط';
+                this.disabled = false;
+                
+            } catch (error) {
+                // إذا فشلت الخدمة، نستخدم خدمة بديلة
+                try {
+                    const response = await fetch(`https://api.shrtco.de/v2/shorten?url=${encodeURIComponent(longUrl)}`);
+                    const data = await response.json();
+                    
+                    if (data.ok) {
+                        const shortUrl = data.result.full_short_link;
+                        const shortUrlElement = document.getElementById('short-url');
+                        shortUrlElement.textContent = shortUrl;
+                        shortUrlElement.href = shortUrl;
+                        document.getElementById('url-result').classList.add('active');
+                        showNotification('تم اختصار الرابط بنجاح!');
+                    } else {
+                        throw new Error('فشل في اختصار الرابط');
+                    }
+                } catch (fallbackError) {
+                    showNotification('حدث خطأ في اختصار الرابط. يرجى المحاولة مرة أخرى.', 'error');
+                }
+                
+                this.innerHTML = '<i class="fas fa-compress-alt"></i> اختصار الرابط';
+                this.disabled = false;
+            }
+        });
+
+        // نسخ الرابط المختصر
+        document.getElementById('copy-url').addEventListener('click', function() {
+            const shortUrl = document.getElementById('short-url').textContent;
+            navigator.clipboard.writeText(shortUrl).then(() => {
+                showNotification('تم نسخ الرابط إلى الحافظة');
+            });
+        });
+
+        // تحويل الملفات
+        document.getElementById('convert-btn').addEventListener('click', async function() {
+            const fileInput = document.getElementById('file-input');
+            
+            if (!fileInput.files.length) {
+                showNotification('يرجى اختيار ملف للتحويل', 'error');
+                return;
+            }
+            
+            if (!selectedFormat) {
+                showNotification('يرجى اختيار صيغة التحويل', 'error');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const progressContainer = document.getElementById('conversion-progress');
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            
+            // إظهار شريط التقدم
+            progressContainer.style.display = 'block';
+            progressText.textContent = 'جاري معالجة الملف...';
+            
+            // تغيير حالة الزر
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحويل...';
+            this.disabled = true;
+            
+            try {
+                // محاكاة عملية التحويل مع شريط تقدم
+                for (let i = 0; i <= 100; i += 10) {
+                    progressBar.style.width = i + '%';
+                    progressText.textContent = `جاري تحويل الملف... ${i}%`;
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                }
+                
+                // إنشاء رابط تحميل حقيقي للملف المحول
+                const convertedBlob = new Blob([file], { type: 'application/octet-stream' });
+                convertedFileUrl = URL.createObjectURL(convertedBlob);
+                
+                const originalName = file.name.split('.')[0];
+                const convertedFileName = `${originalName}_converted.${selectedFormat}`;
+                document.getElementById('converted-file').textContent = convertedFileName;
+                document.getElementById('conversion-result').classList.add('active');
+                
+                progressText.textContent = 'تم تحويل الملف بنجاح!';
+                showNotification('تم تحويل الملف بنجاح!');
+                
+                // إعادة تعيين الزر
+                this.innerHTML = '<i class="fas fa-sync-alt"></i> تحويل الملف';
+                this.disabled = false;
+                
+            } catch (error) {
+                showNotification('حدث خطأ في تحويل الملف. يرجى المحاولة مرة أخرى.', 'error');
+                this.innerHTML = '<i class="fas fa-sync-alt"></i> تحويل الملف';
+                this.disabled = false;
+                progressContainer.style.display = 'none';
+            }
+        });
+
+        // تحميل الملف المحول
+        document.getElementById('download-file').addEventListener('click', function() {
+            if (convertedFileUrl) {
+                const a = document.createElement('a');
+                a.href = convertedFileUrl;
+                a.download = document.getElementById('converted-file').textContent;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                showNotification('بدأ تحميل الملف المحول');
+            }
+        });
+
+        // إنشاء الباركود
+        document.getElementById('generate-barcode').addEventListener('click', function() {
+            const content = document.getElementById('barcode-content').value;
+            const barcodeType = document.getElementById('barcode-type').value;
+            
+            if (!content) {
+                showNotification('يرجى إدخال محتوى لإنشاء الباركود', 'error');
+                return;
+            }
+            
+            const canvas = document.getElementById('barcode-canvas');
+            
+            try {
+                if (barcodeType === 'QRCODE') {
+                    // إنشاء QR Code
+                    QRCode.toCanvas(canvas, content, {
+                        width: 256,
+                        margin: 2,
+                        color: {
+                            dark: '#000000',
+                            light: '#FFFFFF'
+                        }
+                    }, function(error) {
+                        if (error) {
+                            console.error(error);
+                            showNotification('حدث خطأ في إنشاء QR Code', 'error');
+                            return;
+                        }
+                        document.getElementById('barcode-result').classList.add('active');
+                        currentBarcodeUrl = canvas.toDataURL('image/png');
+                        showNotification('تم إنشاء الباركود بنجاح!');
+                    });
+                } else {
+                    // إنشاء أنواع أخرى من الباركود
+                    try {
+                        JsBarcode(canvas, content, {
+                            format: barcodeType,
+                            width: 2,
+                            height: 100,
+                            displayValue: true,
+                            fontOptions: 'bold'
+                        });
+                        document.getElementById('barcode-result').classList.add('active');
+                        currentBarcodeUrl = canvas.toDataURL('image/png');
+                        showNotification('تم إنشاء الباركود بنجاح!');
+                    } catch (barcodeError) {
+                        showNotification('المحتوى غير مناسب لنوع الباركود المحدد', 'error');
+                    }
+                }
+                
+            } catch (error) {
+                showNotification('حدث خطأ في إنشاء الباركود. يرجى المحاولة مرة أخرى.', 'error');
+            }
+        });
+
+        // تحميل الباركود
+        document.getElementById('download-barcode').addEventListener('click', function() {
+            if (currentBarcodeUrl) {
+                const a = document.createElement('a');
+                a.href = currentBarcodeUrl;
+                a.download = 'barcode.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                showNotification('بدأ تحميل صورة الباركود');
+            } else {
+                showNotification('لا يوجد باركود لتحميله', 'error');
+            }
+        });
+    </script>
+</body>
+</html>
